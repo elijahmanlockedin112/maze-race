@@ -19,6 +19,27 @@ of cells per frame — so what you watch is which one wastes the least effort.
 
 Keyboard: <kbd>Space</kbd> play/pause, <kbd>R</kbd> new maze.
 
+## Frontier Quest
+
+`quest.html` is a game built on the same idea: every search algorithm is one rule for picking
+the next cell from the frontier. Instead of watching, you play the rule yourself, one click
+per expansion, and the algorithm happens. Also a single self-contained file.
+
+| Mode | What you do |
+|---|---|
+| Trace levels | Be BFS (oldest cell), DFS (newest), Greedy (lowest h), A* (lowest f = g + h), UCS (lowest g). Three hearts; a wrong pick explains which cell the rule wanted and why |
+| Bets | Predict the race (shorter path, bigger frontier, fewer cells explored), then watch it play out |
+| Cut the Tree | Minimax with alpha-beta: flip cards left to right and prune only what is proven irrelevant |
+| Final Exam | 10 timed questions drawn from a bank of 20 |
+| Endless Frontier | 60-second time attack where the rule changes every board |
+| Escape the Bots | Run the maze yourself against DFS, BFS and A*, all exploring at 10 cells a second |
+
+Every trace map was chosen by search so its lesson holds however the player breaks ties:
+Greedy always ends 4 steps longer than A*, DFS always returns a 16-step path where 8 exists,
+and A* with 3 × h always misses the cheapest route. Bet rounds generate a fresh maze each
+time and keep only mazes where the race proves the answer. Progress, stars and best scores
+are saved in `localStorage`.
+
 ## The algorithms
 
 | | Behaviour |
