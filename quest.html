@@ -14,7 +14,7 @@
     color-scheme:dark;
     --night:#0c1424; --night-a:rgba(12,20,36,.9); --grid:rgba(120,150,210,.055); --scrim:rgba(4,8,16,.74);
     --panel:#121d33; --panel2:#0e172a; --line:#22324f;
-    --floor:#17243d; --wall:#2a3d61; --wall-top:#3d5688; --mud:#5a3e28; --mud-dot:#7b5636;
+    --floor:#17243d; --wall:#2a3d61; --wall-top:#3d5688; --mud:#3a4a29; --mud-dot:#5c7438;
     --ink:#e9eefa; --dim:#9aaacb; --faint:#62749a;
     --torch:#ffb547; --torch-hi:#ffc66e; --torch-ink:#2b1800;
     --chalk:#5fd4c2; --cream:#fff2d2;
@@ -305,10 +305,11 @@
 <section id="home">
   <div class="hero">
     <div>
-      <p class="eyebrow">Search · BFS, DFS and A*</p>
+      <p class="eyebrow">Unit 9 · L14 · Search: BFS, DFS and A*</p>
       <h1>Every search is one rule for picking the next cell.</h1>
-      <p class="lede">The <b>frontier</b> is every cell you've discovered but haven't explored yet. BFS takes the oldest one. DFS takes the newest.
-        A* takes the lowest <b>f = g + h</b>. Follow the rule, click by click, and you are the algorithm.</p>
+      <p class="lede">A castle guard has to walk from the gate to the tower, and its AI can only see the places right next to it.
+        The <b>frontier</b> is every place it has discovered but not explored yet. BFS takes the oldest. DFS takes the newest.
+        A* takes the lowest <b>f = g + h</b>. Follow the rule, click by click, and you are the guard's AI.</p>
       <div class="cta"><button class="btn primary" id="continueBtn">Play level 1</button><button class="btn ghost" id="cheatBtn">Rules cheat sheet</button></div>
     </div>
     <figure class="demo" aria-label="Live demo of search algorithms">
@@ -322,21 +323,22 @@
     <div class="arcade" id="arcade"></div>
   </div>
   <div class="cheat" id="cheat">
-    <h2 class="sect">Cheat sheet <span>the table from the lesson</span></h2>
+    <h2 class="sect">Cheat sheet <span>from L14 and the D7 cheat sheet</span></h2>
     <div class="tablewrap"><table>
       <thead><tr><th>Search</th><th>Picks next</th><th>Frontier is a</th><th>Shortest path?</th><th>Memory</th></tr></thead>
       <tbody>
         <tr><td><b>BFS</b></td><td>Oldest cell</td><td>Queue (first in, first out)</td><td><b>Yes</b>, in steps, when every step costs the same</td><td>High: the whole ripple edge</td></tr>
-        <tr><td><b>DFS</b></td><td>Newest cell</td><td>Stack (last in, first out)</td><td>No. An answer, not the best answer</td><td><b>Low</b>: just the current path</td></tr>
-        <tr><td><b>UCS / Dijkstra</b></td><td>Lowest g</td><td>Priority queue</td><td><b>Yes</b>, even when steps cost different amounts</td><td>High</td></tr>
+        <tr><td><b>DFS</b></td><td>Newest cell</td><td>Stack (last in, first out)</td><td>No. An answer, not the best answer. Can be lost for good in a very deep or endless dungeon</td><td><b>Low</b>: just the current path</td></tr>
+        <tr><td><b>UCS / Dijkstra</b> (A* with h = 0)</td><td>Lowest g</td><td>Priority queue</td><td><b>Yes</b>, even when steps cost different amounts</td><td>High</td></tr>
         <tr><td><b>Greedy best-first</b></td><td>Lowest h</td><td>Priority queue</td><td>No. Ignores the cost already paid</td><td>Moderate</td></tr>
-        <tr><td><b>A*</b></td><td>Lowest f = g + h</td><td>Priority queue</td><td><b>Yes</b>, if h never overestimates (admissible)</td><td>High</td></tr>
+        <tr><td><b>A*</b></td><td>Lowest f = g + h</td><td>Priority queue</td><td><b>Yes</b>, if h never overestimates (admissible). Built for maps like swamp 3 / road 1</td><td>High</td></tr>
       </tbody>
     </table></div>
     <div class="mn">
       <span><b>g</b> = gone: cost already paid</span>
       <span><b>h</b> = heuristic: guess of what's left</span>
       <span><b>admissible</b> = never overestimates</span>
+      <span><b>closer admissible h</b> = fewer nodes, still optimal</span>
       <span><b>alpha-beta</b> = same move as minimax, fewer nodes</span>
     </div>
   </div>
@@ -429,6 +431,7 @@
   </div>
   <div class="qcard">
     <div class="timerbar"><i id="qTime"></i></div>
+    <p class="eyebrow" id="qSrc" style="margin:0"></p>
     <p class="qtext" id="qText"></p>
     <div class="qopts" id="qOpts"></div>
     <p class="why" id="qWhy" hidden></p>
@@ -440,23 +443,23 @@
 <section id="escape" hidden>
   <div class="stagebar">
     <button class="btn ghost small" data-home>← Map</button>
-    <div class="stagetitle"><span class="lvl">Arcade</span><h2>Escape the Bots</h2><span class="tag" id="eAlgo">DFS</span></div>
-    <div class="hud"><span><span class="lbl">Heat</span><b id="eHeat">1/3</b></span><span><span class="lbl">Escapes</span><b id="eWins">0</b></span></div>
+    <div class="stagetitle"><span class="lvl">Arcade</span><h2>Race the Guards</h2><span class="tag" id="eAlgo">DFS</span></div>
+    <div class="hud"><span><span class="lbl">Heat</span><b id="eHeat">1/3</b></span><span><span class="lbl">Won</span><b id="eWins">0</b></span></div>
   </div>
   <div class="esc">
     <div class="boardwrap" id="eWrap">
-      <canvas id="escCv" aria-label="Maze. Use arrow keys, WASD, swipes or the pad to move."></canvas>
+      <canvas id="escCv" aria-label="Castle maze. Use arrow keys, WASD, swipes or the pad to move."></canvas>
       <div class="count" id="eCount" hidden></div>
       <div class="msg" id="eMsg" role="status" aria-live="polite"></div>
     </div>
     <aside class="side">
       <div class="rulecard">
-        <p class="eyebrow">Your opponent</p>
+        <p class="eyebrow">The guard you're racing</p>
         <p class="rule" id="eRule"></p>
-        <p class="sub">Every bot explores <b>10 cells a second</b>. Same speed for all three. The only difference is how much maze each one has to search.</p>
+        <p class="sub">Every guard explores <b>10 places a second</b>. Same speed for all three. The only difference is how much of the castle each one has to search.</p>
       </div>
       <div class="vs">
-        <div><span>Bot explored</span><b id="eBot">0</b></div>
+        <div><span>Guard explored</span><b id="eBot">0</b></div>
         <div><span>Your steps</span><b id="eYou">0</b></div>
       </div>
       <div class="dpad" aria-label="Movement pad">
@@ -483,7 +486,7 @@ function hashSeed(s){let h=2166136261;s=String(s);for(let i=0;i<s.length;i++){h^
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 /* tiles */
-const FLOOR=0,WALL=1,MUD=2,MUD_COST=5;
+const FLOOR=0,WALL=1,MUD=2,MUD_COST=3;            // MUD is the lesson's swamp: 3 to cross, road 1
 const COST=[1,0,MUD_COST];
 
 function parseMap(rows){
@@ -528,7 +531,7 @@ const ALGOS={
 class Search{
   constructor(G,algo,opt){
     opt=opt||{};
-    this.G=G;this.algo=algo;this.hs=opt.hScale||1;
+    this.G=G;this.algo=algo;this.hs=opt.hScale||1;this.hk=opt.h||'grid';
     const n=G.w*G.h;
     this.closed=new Uint8Array(n);
     this.parent=new Int32Array(n).fill(-1);
@@ -538,7 +541,12 @@ class Search{
     this.open.set(G.start,{g:0,d:0,h:this.hOf(G.start),t:0});
     this.lastAdded=[G.start];
   }
-  hOf(c){return manhattan(this.G,c,this.G.goal)*this.hs}
+  hOf(c){
+    const G=this.G;
+    if(this.hk==='zero')return 0;
+    if(this.hk==='line'){const dx=c%G.w-G.goal%G.w,dy=((c/G.w)|0)-((G.goal/G.w)|0);return Math.sqrt(dx*dx+dy*dy)*this.hs}
+    return manhattan(G,c,G.goal)*this.hs;
+  }
   key(e){
     switch(this.algo){
       case'bfs':return e.d;
@@ -667,47 +675,66 @@ function genField(w,h,seed,o){
 /* ─────────────────────────────  bet rounds  ───────────────────────────── */
 /* Each round asks a question the lesson can answer, on a maze where the
    race really does turn out that way, then plays the race as proof.       */
+const VARIANTS={astar3:['astar',{hScale:3}],astar0:['astar',{h:'zero'}],astarL:['astar',{h:'line'}]};
+const runAs=(G,a)=>{const v=VARIANTS[a];return new Search(G,v?v[0]:a,v?v[1]:null).run()};
+/* a dungeon whose west corridor never ends: DFS takes it first and is never seen again */
+const ENDLESS_MAP=['#########........','#########..#.....','#########..#..G..','#########..####..','#########........',
+  '#.......S........','#.#######.##.....','#.......#........','#######.#....#...','........#........','#########........'];
 const BETS={
-  pathBD:{algos:['bfs','dfs'],q:'Which one will find the shorter path?',
+  pathBD:{algos:['bfs','dfs'],q:'Which one will find the shorter path to the tower?',
     opts:[['bfs','BFS'],['dfs','DFS'],['same','Same length']],ans:'bfs',
     ok:r=>r.dfs.cost()>=r.bfs.cost()+6,
-    why:'BFS checks every 1-step cell, then every 2-step cell, so the first time it reaches the goal no shorter path exists. DFS commits to a corridor and takes the first exit it stumbles on.'},
+    why:'BFS checks every place 1 step from the gate, then every place 2 steps away, so the first time it reaches the tower nothing shorter exists. DFS commits to a corridor and takes the first route it stumbles on.'},
   memBD:{algos:['bfs','dfs'],q:'Which one needs MORE memory? (the bigger frontier at its peak)',
     opts:[['bfs','BFS'],['dfs','DFS']],ans:'bfs',
     ok:r=>r.bfs.peak>=r.dfs.peak+3,
-    why:'BFS has to remember its whole ripple edge at once. DFS mostly remembers the one path it is on, so its frontier stays small.'},
-  tfDFS:{algos:['bfs','dfs'],q:'True or false: the first path DFS finds is always the shortest one.',
-    opts:[['t','True'],['f','False']],ans:'f',
-    ok:r=>r.dfs.cost()>=r.bfs.cost()+8,
-    why:'False. DFS gives you a path, not the best path. Only BFS (on unweighted grids) guarantees the shortest.'},
-  exploredBA:{algos:['bfs','astar'],q:'Which one explores FEWER cells before it reaches the goal?',
+    why:'BFS tracks its whole ripple edge at once. DFS only has to remember the path it is currently on, so its frontier stays small.'},
+  endless:{algos:['bfs','dfs'],fixed:true,q:'This dungeon\'s west corridor (∞) never ends. Which search is sure to reach the tower?',
+    opts:[['bfs','BFS'],['dfs','DFS'],['both','Both']],ans:'bfs',
+    why:'DFS takes the newest cell, so it follows the endless corridor and never comes back. BFS spreads out evenly from the gate and reaches the tower without needing the corridor to end. DFS is a poor choice when the search space is very deep or possibly infinite.'},
+  exploredBA:{algos:['bfs','astar'],q:'Which one explores FEWER places before it reaches the tower?',
     opts:[['bfs','BFS'],['astar','A*'],['same','About the same']],ans:'astar',
     ok:r=>r.astar.order.length<=r.bfs.order.length*0.7,
-    why:'Both find the shortest path, but A* uses h to aim at the goal. BFS ripples out evenly in every direction, including the wrong ones.'},
+    why:'Both find the shortest path here, but A* uses h to aim at the tower. BFS ripples out evenly in every direction, including the wrong ones.'},
   pathGA:{algos:['greedy','astar'],q:'Which one will find the shorter path?',
     opts:[['greedy','Greedy'],['astar','A*'],['same','Same length']],ans:'astar',
     ok:r=>r.greedy.cost()>=r.astar.cost()+4,
-    why:'Greedy only looks at h, the distance left, so it charges toward the goal and ignores how far it has already come. A* adds g back in.'},
-  guaranteeGA:{algos:['greedy','astar'],q:'Only one of these is GUARANTEED the shortest path when h never overestimates. Which?',
-    opts:[['greedy','Greedy'],['astar','A*']],ans:'astar',
-    ok:r=>r.greedy.cost()>=r.astar.cost()+4,
-    why:'A* with an admissible heuristic is optimal. Greedy has no such guarantee, even with the same heuristic.'},
-  mudBU:{algos:['bfs','ucs'],q:'Mud costs 5 to cross. Which one finds the CHEAPER path?',
-    opts:[['bfs','BFS'],['ucs','UCS / Dijkstra'],['same','Same cost']],ans:'ucs',
-    ok:r=>r.bfs.cost()>=r.ucs.cost()+6,mud:true,
-    why:'BFS finds the fewest steps, not the lowest cost. When steps cost different amounts you need uniform-cost search (Dijkstra) or A*.'},
-  overA:{algos:['astar','astar3'],q:'Same maze. One A* uses h, the other uses 3 × h (an overestimate). Which might MISS the shortest path?',
+    why:'Greedy only looks at h, the distance left, so it charges at the tower and ignores how far it has already come. A* adds g back in.'},
+  zeroH:{algos:['astar0','astar'],q:'Both heuristics never overestimate. One is h = 0; the other is the distance to the tower. Which A* explores FEWER places?',
+    opts:[['astar0','A* with h = 0'],['astar','A* with distance h'],['same','Same']],ans:'astar',
+    ok:r=>r.astar.order.length<=r.astar0.order.length*0.7,
+    why:'h = 0 is admissible, so A* still finds the best path, but it gives A* no sense of direction at all: it spreads out like BFS. An estimate that actually points at the tower saves the work.'},
+  closerH:{algos:['astarL','astar'],q:'The guard can only move across and down the grid. Straight-line distance and grid distance (steps across + steps down) both never overestimate here. Which A* explores FEWER places?',
+    labels:{astar:'A* · grid-distance h'},
+    opts:[['astarL','Straight-line h'],['astar','Grid-distance h'],['same','Same']],ans:'astar',
+    ok:r=>r.astar.order.length<=r.astarL.order.length*0.8&&r.astar.cost()===r.astarL.cost(),
+    why:'Grid distance is never smaller than straight-line distance, so it sits closer to the true cost left. Among admissible heuristics, the closer one expands fewer nodes and still finds the best path.'},
+  mudBU:{algos:['bfs','ucs'],q:'Swamp costs 3 to cross, road costs 1. Which one finds the CHEAPER route?',
+    opts:[['bfs','BFS'],['ucs','UCS (A* with h = 0)'],['same','Same cost']],ans:'ucs',
+    ok:r=>r.bfs.cost()>=r.ucs.cost()+4,mud:true,
+    why:'BFS finds the fewest steps, not the lowest cost. When steps cost different amounts you need a search that ranks by cost paid, g: uniform-cost search, or A*.'},
+  overA:{algos:['astar','astar3'],q:'Same map. One A* uses h, the other uses 3 × h, which overestimates. Which might MISS the cheapest route?',
     opts:[['astar','A* with h'],['astar3','A* with 3 × h']],ans:'astar3',
-    ok:r=>r.astar3.cost()>=r.astar.cost()+4,mud:true,
-    why:'3 × h overestimates the remaining cost, so it is not admissible. A* gets pushed toward the goal and stops trusting g, and the guarantee is gone.'}
+    ok:r=>r.astar3.cost()>=r.astar.cost()+3,mud:true,
+    why:'3 × h overestimates the cost left, so it is not admissible. A* gets talked out of the best route, and the guarantee is gone.'}
 };
 function makeBet(type,seed){
   const B=BETS[type];
+  if(B.fixed){
+    const rng=mulberry32(hashSeed(type+seed));
+    const G=parseMap(rng()<0.5?ENDLESS_MAP:ENDLESS_MAP.slice().reverse());   // a vertical flip keeps DFS heading west
+    G.endless=-1;
+    for(let y=0;y<G.h;y++)if(G.t[y*G.w]!==WALL)G.endless=y*G.w;
+    const r={bfs:new Search(G,'bfs').run(),dfs:new Search(G,'dfs').run()};
+    const i=r.dfs.order.indexOf(G.endless);           // the corridor never ends, so DFS stops being heard from here
+    if(i>=0){r.dfs.order=r.dfs.order.slice(0,i+1);r.dfs.found=false;r.dfs.lost=true}
+    return{G,r,B,type};
+  }
   for(let i=0;i<400;i++){
     const G=genMaze(B.mud?17:19,B.mud?13:15,type+':'+seed+':'+i,
-      B.mud?{braid:0.7,holes:0.25,mud:0.22}:{braid:0.55,holes:0.12});
+      B.mud?{braid:0.7,holes:0.25,mud:0.24}:{braid:0.55,holes:0.12});
     const r={};
-    for(const a of B.algos)r[a]=new Search(G,a==='astar3'?'astar':a,a==='astar3'?{hScale:3}:null).run();
+    for(const a of B.algos)r[a]=runAs(G,a);
     if(B.ok(r))return{G,r,B,type};
   }
   return null;
@@ -741,7 +768,7 @@ const C={floor:tok('--floor'),wall:tok('--wall'),wallTop:tok('--wall-top'),mud:t
   ink:tok('--ink'),faint:tok('--faint'),torch:tok('--torch'),torchInk:tok('--torch-ink'),cream:tok('--cream'),
   start:tok('--start'),goal:tok('--goal'),bad:tok('--bad'),panel:tok('--panel'),night:tok('--night')};
 const MONO='"Atkinson Hyperlegible Mono",ui-monospace,SFMono-Regular,Menlo,monospace';
-const HUES=Object.assign({astar3:18},Object.fromEntries(Object.entries(ALGOS).map(([k,v])=>[k,v.hue])));
+const HUES=Object.assign({astar3:18,astar0:268,astarL:190},Object.fromEntries(Object.entries(ALGOS).map(([k,v])=>[k,v.hue])));
 const hueOf=a=>HUES[a]==null?150:HUES[a];
 const algoColor=(a,l)=>'hsl('+hueOf(a)+',78%,'+(l||64)+'%)';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -897,7 +924,11 @@ class Board{
     if(this.hover>=0&&S&&S.open.has(this.hover)){
       const [x,y]=this.xy(this.hover);ctx.strokeStyle=C.ink;ctx.lineWidth=2;roundRect(ctx,x+1,y+1,cs-2,cs-2,cs*0.16);ctx.stroke();
     }
-    this.marker(G.start,C.start,'S');this.marker(G.goal,C.goal,'G');
+    this.marker(G.start,C.start,'S');this.marker(G.goal,C.goal,'T');
+    if(G.endless>=0&&G.endless!=null){                 // the corridor that never ends
+      const [x,y]=this.xy(G.endless);ctx.fillStyle=C.cream;ctx.font='700 '+Math.round(cs*0.8)+'px '+MONO;
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('∞',x+cs/2,y+cs/2+1);
+    }
     if(this.path&&this.path.length){
       let n=this.path.length;
       if(this.pathAnim){const k=Math.min(1,(now-this.pathAnim.t0)/this.pathAnim.dur);n=Math.max(1,Math.ceil(k*this.path.length));if(k<1)live=true}
@@ -978,120 +1009,126 @@ class Replay{
   }
 }
 
-/* ─────────────────────────────  levels  ───────────────────────────── */
+/* ─────────────────────────────  levels  ─────────────────────────────
+   Text follows the war-room lesson L14 ("the AI inside one video game"):
+   a castle guard walking from the gate (S) to the tower (T).            */
 const GA_MAP=['##.....#.','S.#.#.#..','#...#....','.........','.##.#...#','..#.#....','.#.#.#...','...G...#.'];
 const LEVELS=[
   {id:'L1',ch:0,type:'trace',title:'The Ripple',algo:'bfs',show:'key',strip:true,
    map:['..#.#.','G..##.','......','.#...#','.#.S.#'],
-   concept:'You stand at the entrance of a maze and can only see the cells next to you. <b>Breadth-first search</b> explores every cell 1 step away, then every cell 2 steps away, then 3. It spreads like a ripple and keeps its frontier in a <b>queue</b>: first in, first out.',
-   rule:'Expand a glowing cell with the <em>fewest steps</em> from the start.',
+   concept:'A castle guard has to walk from the gate (<b>S</b>) to the tower (<b>T</b>), and its AI can only see the places right next to it. <b>Breadth-first search</b> explores every place 1 step from the gate, then every place 2 steps away, then 3. It spreads like a ripple, kept in a <b>queue</b>: first in, first out.',
+   rule:'Expand a glowing cell with the <em>fewest steps</em> from the gate.',
    sub:'The number on each glowing cell is its step count. Clear every 1 before any 2.',
-   take:s=>'BFS reached the goal in <b>'+s.cost+' steps</b>, and nothing shorter exists: it had already checked every shorter distance. That guarantee is why BFS is the answer for shortest paths on unweighted grids. The price is memory: its frontier peaked at <b>'+s.peak+'</b> cells.',
-   remember:'BFS uses a queue, finds the shortest path in edges, and costs memory.'},
+   take:s=>'BFS reached the tower in <b>'+s.cost+' steps</b>, and nothing shorter exists: anything shorter would have been reached first. On a map where every step costs the same, that is the BFS guarantee. The price is memory: it tracked a frontier of up to <b>'+s.peak+'</b> places at once.',
+   remember:'BFS uses a queue, finds the shortest path counted in steps, and costs memory.'},
   {id:'L2',ch:0,type:'trace',title:'Deep Dive',algo:'dfs',show:'order',strip:true,
    map:['...##..#','.##.#...','##S.....','.....#..','......#.','..#.#.#.','....#.G.'],
-   concept:'<b>Depth-first search</b> picks a corridor and follows it as far as it goes. Dead end? Back up to the last junction and take a different turn. It keeps its frontier in a <b>stack</b>: last in, first out.',
+   concept:'<b>Depth-first search</b> picks a corridor and follows it as far as it goes. Dead end? Back up to the last junction and take a different turn. Deep before wide. The guard only remembers the path it is on, kept on a <b>stack</b>: last in, first out.',
    rule:'Expand the <em>newest</em> glowing cell: the highest number.',
-   sub:'Numbers show the order cells were pushed onto the stack. The top of the stack is the biggest.',
-   take:s=>'DFS found a path <b>'+s.cost+' steps</b> long. The shortest is <b>'+s.opt+'</b>. DFS only remembers the path it is on, so its frontier never went past <b>'+s.peak+'</b> cells, but it hands you an answer, not the best answer. BFS has to explore '+s.bfs.order.length+' cells here to guarantee the '+s.opt+'-step route.',
-   remember:'DFS uses a stack and little memory. It is not guaranteed to find the shortest path.'},
-  {id:'L3',ch:0,type:'bet',title:'Place Your Bets',tag:'BFS vs DFS',rounds:['pathBD','memBD','tfDFS'],
-   concept:'Two searches, one maze. Predict what happens, then watch them race. They explore at exactly the same speed, one cell per tick, so whichever needs fewer cells finishes first.',
-   rule:'Read the question, study the maze, and <em>call it</em> before the race starts.',
-   remember:'BFS: shortest path, big frontier. DFS: small frontier, no guarantee.'},
+   sub:'Numbers show the order places were pushed onto the stack. The top of the stack is the biggest.',
+   take:s=>'DFS found a route <b>'+s.cost+' steps</b> long. The shortest is <b>'+s.opt+'</b>. Its frontier never went past <b>'+s.peak+'</b> places, which is why it is cheap on memory, but DFS gives you an answer, not the best one. BFS has to explore '+s.bfs.order.length+' places here to guarantee the '+s.opt+'-step route.',
+   remember:'DFS uses a stack and little memory. It is not guaranteed the shortest path, and it can get lost in a very deep or endless dungeon.'},
+  {id:'L3',ch:0,type:'bet',title:'Place Your Bets',tag:'BFS vs DFS',rounds:['pathBD','memBD','endless'],
+   concept:'Two searches, one dungeon. Predict what happens, then watch them race. They explore at exactly the same speed, one place per tick, so whichever needs fewer places finishes first.',
+   rule:'Read the question, study the map, and <em>call it</em> before the race starts.',
+   remember:'BFS: shortest path in steps, big frontier. DFS: small frontier, no guarantee, and lost for good in an endless corridor.'},
   {id:'L4',ch:1,type:'trace',title:'Compass',algo:'greedy',show:'key',strip:true,map:GA_MAP,
-   concept:'Now give the search a sense of direction. A <b>heuristic</b>, h, is a quick estimate of the distance left. Here it is the Manhattan distance: steps across plus steps down, ignoring walls. <b>Greedy best-first search</b> looks at h and nothing else.',
+   concept:'Now give the guard a sense of direction. A <b>heuristic</b>, h, is an estimate of the distance still to go to the tower. The lesson uses straight-line distance; this guard moves only across and down the grid, so here h is steps across plus steps down. <b>Greedy best-first search</b> looks at h and nothing else.',
    rule:'Expand the glowing cell with the <em>lowest h</em>.',
-   sub:'The number on each glowing cell is h, its estimated distance to the goal.',
-   take:s=>'Greedy explored only <b>'+s.exp+'</b> cells, but its path costs <b>'+s.cost+'</b>. The best path costs <b>'+s.opt+'</b>. It charged at the goal and never counted the steps it had already spent.',
+   sub:'The number on each glowing cell is h, its estimated distance to the tower.',
+   take:s=>'Greedy explored only <b>'+s.exp+'</b> places, but its route costs <b>'+s.cost+'</b>. The best route costs <b>'+s.opt+'</b>. It charged at the tower and never counted the steps it had already spent.',
    remember:'Greedy follows h only, so it can take an expensive route.'},
   {id:'L5',ch:1,type:'trace',title:'Star Power',algo:'astar',show:'ghf',strip:true,map:GA_MAP,
-   concept:'Same map as Compass. <b>A*</b> is BFS with a sense of direction. It adds two numbers: <b>g</b>, the cost already paid to reach a cell, and <b>h</b>, the estimate of what is left. <b>f = g + h</b> is its best guess at the whole trip through that cell.',
+   concept:'Same map as Compass. <b>A*</b> scores every place the guard could go next with one formula, <b>f = g + h</b>. <b>g</b> is the cost already paid to get there from the gate: real, known. <b>h</b> is the estimate of the cost still to go. A* always explores the lowest f. It is BFS with a sense of direction.',
    rule:'Expand the glowing cell with the <em>lowest f = g + h</em>.',
    sub:'Big number: f. Bottom left: g. Bottom right: h. Ties are fine; any lowest f counts.',
-   take:s=>'A* found the <b>'+s.cost+'-step</b> path, the shortest possible, after exploring <b>'+s.exp+'</b> cells. On this map BFS explores '+s.bfs.order.length+', and Greedy\'s path costs '+s.greedy.cost()+'.',
-   remember:'f = g + h. g = gone (cost already paid). h = heuristic (guess of what is left).'},
+   take:s=>'A* found the <b>'+s.cost+'-step</b> route, the shortest possible, after exploring <b>'+s.exp+'</b> places. On this map BFS explores '+s.bfs.order.length+', and Greedy\'s route costs '+s.greedy.cost()+'.',
+   remember:'f = g + h. g = gone (cost already paid from the gate). h = heuristic (estimate of what is left).'},
   {id:'L6',ch:1,type:'trace',title:'Do the Math',algo:'astar',show:'gh',strip:false,
    map:['#.#.......','.#....#.#.','#.##...##.','.#......G#','..#......#','##...#....','S#.#....#.','...##..##.'],
    concept:'Same rule, training wheels off. Each glowing cell now shows <b>g+h</b> and you do the adding. The frontier list is hidden too.',
    rule:'Add g + h in your head and expand the <em>lowest total</em>.',
    sub:'Shown as g+h. The trap: the lowest g alone is what UCS picks, the lowest h alone is what Greedy picks.',
-   take:s=>'Shortest path ('+s.cost+') after exploring '+s.exp+' cells. BFS would explore '+s.bfs.order.length+'. On a test this is nearly always about the formula: <b>g</b> is the known cost from the start, <b>h</b> is the estimate to the goal. Swapping them is the most common mistake.',
-   remember:'In f(n) = g(n) + h(n), g is the actual cost so far and h estimates the rest.'},
-  {id:'L7',ch:1,type:'bet',title:'Informed Bets',tag:'BFS · Greedy · A*',rounds:['exploredBA','pathGA','guaranteeGA'],
-   concept:'Informed searches use a heuristic. Uninformed ones (BFS, DFS) don\'t. Call each race before it runs.',
+   take:s=>'Shortest route ('+s.cost+') after exploring '+s.exp+' places. BFS would explore '+s.bfs.order.length+'. On the paper this is nearly always about the formula: <b>g</b> is the actual cost from the start, <b>h</b> estimates the rest. Reversing them is the most common error.',
+   remember:'In f(n) = g(n) + h(n), g is the actual cost from start to n and h estimates the rest.'},
+  {id:'L7',ch:1,type:'bet',title:'Informed Bets',tag:'Heuristics',rounds:['exploredBA','pathGA','zeroH','closerH'],
+   concept:'Informed searches use a heuristic; BFS and DFS don\'t. These four races cover what the lesson says about h: it aims the search, Greedy misuses it, h = 0 is admissible but directionless, and a closer admissible h does less work.',
    rule:'Predict, then <em>watch the proof</em>.',
-   remember:'A* with an admissible h is optimal and usually explores far less than BFS.'},
-  {id:'L8',ch:2,type:'trace',title:'Mud Season',algo:'ucs',show:'key',strip:true,
-   map:['..#...S.','#.~~.#..','...#.#..','#..~....','....~~~.','....~~~.','....G...'],
-   concept:'Brown tiles are <b>mud</b>: stepping onto one costs '+MUD_COST+' instead of 1. BFS counts steps, so it would wade straight through. <b>Uniform-cost search</b> (Dijkstra\'s algorithm) always expands the cheapest total cost so far, g.',
+   remember:'Among admissible heuristics, the one closer to the true cost expands fewer nodes and is still optimal.'},
+  {id:'L8',ch:2,type:'trace',title:'Swamp Season',algo:'ucs',show:'key',strip:true,
+   map:['......#.','....#.#.','#~~~.#..','~~~#.#..','S~~~...#','.#~~....','.......G'],
+   concept:'Green-brown tiles are <b>swamp</b>: crossing one costs '+MUD_COST+'; a road tile costs 1. BFS counts steps, so it would wade straight through. Start with A* stripped of its heuristic, <b>h = 0</b>. That is admissible, it just gives no sense of direction, and what is left is called <b>uniform-cost search</b> (Dijkstra): always expand the lowest cost paid so far, g.',
    rule:'Expand the glowing cell with the <em>lowest g</em>, the total cost so far.',
-   sub:'Grass costs 1 to enter, mud costs '+MUD_COST+'. The number on each cell is g.',
-   take:s=>'Your path costs <b>'+s.cost+'</b>, the cheapest possible. BFS\'s fewest-steps path costs <b>'+s.bfs.cost()+'</b> on this map. BFS finds the fewest edges, not the cheapest route.',
-   remember:'BFS is optimal only when every step costs the same. For different costs use UCS / Dijkstra, or A*.'},
+   sub:'Road costs 1 to enter, swamp costs '+MUD_COST+'. The number on each cell is g.',
+   take:s=>'Your route costs <b>'+s.cost+'</b>, the cheapest possible. BFS\'s fewest-steps route costs <b>'+s.bfs.cost()+'</b> on this map. BFS finds the fewest steps, not the cheapest route.',
+   remember:'BFS is optimal only when every step costs the same. With costs, rank by g: uniform-cost search, or A*.'},
   {id:'L9',ch:2,type:'trace',title:'Swamp Star',algo:'astar',show:'ghf',strip:false,
-   map:['.G~~~~~..','....~#...','.##.~#...','....#~...','#........','......S..','.#~~~....','...#.....'],
-   concept:'A* handles costs too. h is still the Manhattan distance, and because every step costs at least 1, h can never overestimate the real cost left. A heuristic that never overestimates is <b>admissible</b>, and that is what keeps A* optimal.',
-   rule:'Expand the <em>lowest f = g + h</em>. Mud still costs '+MUD_COST+'.',
+   map:['.........','......##.','#........','#......G.','#~~..#.#.','~~.....##','~..~~.~~~','S..~#.~~.'],
+   concept:'Now put h back. This is the job the lesson gives A*: maps where steps cost different amounts. Every step costs at least 1, so h can never overestimate what is really left. A heuristic that never overestimates is <b>admissible</b>, and that is what keeps A* finding the cheapest route.',
+   rule:'Expand the <em>lowest f = g + h</em>. Swamp still costs '+MUD_COST+'.',
    sub:'Big number: f. Bottom left: g. Bottom right: h.',
-   take:s=>'The cheapest path ('+s.cost+'), the same one UCS finds, but A* explored <b>'+s.exp+'</b> cells where UCS needs <b>'+s.ucs.order.length+'</b>. The heuristic aims the search and admissibility keeps it honest.',
+   take:s=>'The cheapest route ('+s.cost+'), the same one uniform-cost search finds, but A* explored <b>'+s.exp+'</b> places where h = 0 needs <b>'+s.ucs.order.length+'</b>. BFS\'s route would cost '+s.bfs.cost()+'.',
    remember:'Admissible heuristic = never overestimates = A* stays optimal.'},
   {id:'L10',ch:2,type:'trace',title:'The Overestimate',algo:'astar',hScale:3,show:'ghf',strip:false,
-   map:['..#....~~','#..#.##~#','....~~..G','....~~~..','.#..~.#..','...#~~...','S.#....#.','.......##'],
-   concept:'What if the estimate lies? This A* uses <b>3 × h</b>, triple the Manhattan distance. That overestimates the distance left, so this heuristic is <b>not admissible</b>. Play the rule exactly and see what you get.',
+   map:['..#......','.#~...##S','~~~~..#~.','~~#~..#~.','.~....~~~','G...##..~','......#.~','.#...#..~'],
+   concept:'What if the estimate lies? This A* uses <b>3 × h</b>, triple the distance to the tower. That overestimates what is left, so this heuristic is <b>not admissible</b>. Play the rule exactly and see what you get.',
    rule:'Expand the <em>lowest f = g + 3h</em>.',
    sub:'The h shown is already tripled. Big number: f.',
-   take:s=>'You followed the rule perfectly and still got a path costing <b>'+s.cost+'</b>. The best costs <b>'+s.opt+'</b>. An overestimating heuristic talked A* out of the best route. It explored only '+s.exp+' cells, which is why people sometimes accept the trade, but the guarantee is gone.',
-   remember:'If h can overestimate, A* can return a path that is not the shortest.'},
+   take:s=>'You followed the rule perfectly and still got a route costing <b>'+s.cost+'</b>. The best costs <b>'+s.opt+'</b>. An overestimating heuristic talked A* out of the best route. That is exactly what admissibility protects against.',
+   remember:'If h can overestimate, A* can return a route that is not the cheapest.'},
   {id:'L11',ch:3,type:'prune',title:'Cut the Tree',tag:'Alpha-beta',
-   concept:'In a game, the opponent fights back. In <b>minimax</b> you are MAX and pick the move with the highest score, assuming the opponent, MIN, answers with the lowest. <b>Alpha-beta pruning</b> skips cards that cannot change MAX\'s choice. Same move, far fewer looks.',
+   concept:'Now the tavern. A character there plays you at a board game, two players taking turns. <b>Minimax</b>: the AI is MAX and picks the move whose worst case is best, assuming you, MIN, always answer with what is worst for it. <b>Alpha-beta pruning</b> skips branches that cannot change its choice, because it already has a better option elsewhere. Same move, far fewer positions examined.',
    rule:'Flip cards left to right. Once a branch is <em>proven</em> worse than what MAX already has, prune it. Then pick MAX\'s move.',
-   remember:'Alpha-beta returns the same move as minimax while examining far fewer nodes.'},
+   remember:'Alpha-beta returns exactly the same move as minimax while examining far fewer positions.'},
   {id:'L12',ch:4,type:'quiz',title:'Final Exam',tag:'10 questions',
-   concept:'Ten questions from the lesson, against the clock. Faster answers score more and a streak multiplies everything.',
+   concept:'Ten questions against the clock: eight straight from your D7 bank, two on points the L14 lesson adds. Faster answers score more and a streak multiplies everything.',
    rule:'Get <em>6 or more</em> right to pass. 8 for two stars, 10 for three.',
    remember:''}
 ];
 const CHAPTERS=[
-  ['Blind search','no idea where the goal is'],
+  ['Blind search','the guard can\'t tell where the tower is'],
   ['A sense of direction','heuristics: Greedy and A*'],
-  ['When steps cost different amounts','mud, Dijkstra and admissibility'],
-  ['Opponents','minimax and alpha-beta'],
-  ['Final exam','everything, against the clock']
+  ['Swamp and road','different step costs and admissibility'],
+  ['The tavern','minimax and alpha-beta'],
+  ['Final exam','your D7 bank, against the clock']
 ];
 const ARCADE=[
   {id:'endless',title:'Endless Frontier',unlock:'L5',
    desc:'60 seconds. The rule changes every board: BFS, DFS, Greedy, A*, and UCS once you reach it. How many correct picks can you chain?'},
-  {id:'escape',title:'Escape the Bots',unlock:'L3',
-   desc:'Run the maze yourself against DFS, BFS and A*. They all explore at the same speed. Can you beat the smart one?'}
+  {id:'escape',title:'Race the Guards',unlock:'L3',
+   desc:'Run from the gate to the tower yourself against three guard AIs: DFS, BFS and A*. They all search at the same speed. Can you beat A*?'}
 ];
 const unlocked=i=>i===0||(P.stars[LEVELS[i-1].id]||0)>0;
 const levelIdx=id=>LEVELS.findIndex(L=>L.id===id);
 const tagFor=L=>L.algo?(L.hScale?'A* · 3h':ALGOS[L.algo].short):L.tag;
 const tagColor=L=>L.algo?algoColor(L.algo,66):'var(--chalk)';
 
-/* ─────────────────────────────  quiz bank  ───────────────────────────── */
-const BANK=[
-  ['Breadth-first search on an unweighted graph is guaranteed to find…','The shortest path counted in number of edges',['The cheapest path when edge costs differ','The longest path to the goal','A path using the least possible memory'],'BFS explores level by level, so the first time it reaches the goal it has used the fewest edges. With different edge costs you need uniform-cost search or Dijkstra.'],
-  ['In A*, f(n) = g(n) + h(n). What are g and h?','g is the actual cost from the start to n; h estimates the rest',['g is the estimate; h is the cost paid so far','Both are estimates of the remaining cost','g is the goal depth; h is the branching factor'],'g = gone, the cost already paid. h = heuristic, the guess of what remains. Swapping them is the most common error.'],
-  ['For A* to guarantee an optimal path, the heuristic must be admissible, meaning it…','Never overestimates the true remaining cost',['Is exactly zero everywhere','Is computed by a neural network','Always overestimates the remaining cost'],'An admissible heuristic never overestimates, so A* cannot be talked out of the real best route.'],
-  ['Compared with BFS, depth-first search generally…','Uses less memory but may miss the shortest path',['Uses more memory and always finds the shortest path','Cannot be implemented with a stack','Is identical to BFS in every way'],'DFS stores only its current path, so memory grows with depth rather than breadth. The first path it finds can be long.'],
-  ['What does alpha-beta pruning do?','Skips branches that cannot change the final choice',['Adds randomness to move selection','Makes the game tree larger','Turns minimax into a neural network'],'It returns the same move as plain minimax while examining far fewer nodes, so you can search deeper in the same time.'],
-  ['You have 75 minutes to solve 40 shortest-path maze puzzles optimally. What do you write first?','Breadth-first search',['A greedy walk toward the goal','A reinforcement learning agent trained live','A genetic algorithm that evolves routes'],'BFS is simple, provably optimal on unweighted grids, and takes minutes to write. Learning-based approaches burn the whole round.'],
-  ['Which data structure holds the BFS frontier?','A queue: first in, first out',['A stack: last in, first out','A priority queue ordered by h','An unordered set'],'BFS takes the oldest cell first, which is exactly what a queue gives you.'],
-  ['Which data structure holds the DFS frontier?','A stack: last in, first out',['A queue: first in, first out','A priority queue ordered by f','A sorted list of distances'],'DFS takes the newest cell, so it keeps diving down the corridor it just opened.'],
-  ['Mud costs 5 to cross and grass costs 1. Which search finds the cheapest route?','Uniform-cost search (Dijkstra)',['Breadth-first search','Depth-first search','Greedy best-first search'],'BFS minimises the number of steps, not their cost. UCS / Dijkstra expands the lowest total cost g first.'],
-  ['Greedy best-first search chooses the next node by…','h only: the estimated distance left',['g only: the cost so far','g + h','The order nodes were discovered'],'Greedy ignores the cost already spent, so it can charge into an expensive route. A* adds g back in.'],
-  ['If h = 0 for every node, A* behaves like…','Uniform-cost search (Dijkstra)',['Depth-first search','Greedy best-first search','Nothing; it stops working'],'h = 0 never overestimates, so it is admissible, but then f = g, which is exactly uniform-cost search.'],
-  ['On a grid where you move up, down, left or right and every step costs 1, Manhattan distance is…','Admissible: it never overestimates',['Inadmissible: it always overestimates','Admissible only if there are no walls','Not a heuristic at all'],'Walls can only make the real trip longer than steps-across plus steps-down, never shorter.'],
-  ['A* is given 3 × the Manhattan distance as its heuristic. What can happen?','It may return a path that is not the shortest',['It always finds the shortest path, faster','It explores every cell, like BFS','It can no longer find any path'],'3 × h overestimates, so it is not admissible and A* loses its guarantee. It often explores fewer cells, which is the trade.'],
-  ['Compared with plain minimax, alpha-beta pruning chooses…','The same move, after examining fewer nodes',['A better move than minimax','A random move among the best few','A worse move, but faster'],'Pruning only skips branches proven unable to change the result, so the answer is identical.'],
-  ['In minimax, what do the two players do?','One maximises the score and the other minimises it, taking turns',['Both maximise their own score at once','Both pick moves at random','One uses BFS and the other uses DFS'],'You (MAX) pick the highest-scoring move, assuming the opponent (MIN) answers with the lowest.'],
-  ['Why couldn\'t exhaustive minimax beat top players at Go?','Its branching factor is far too large to search exhaustively',['Go has no winning condition','Go boards are too small to matter','Computers cannot store Go positions'],'AlphaGo combined deep neural networks with Monte Carlo tree search, which samples playouts instead of enumerating every branch.'],
-  ['Monte Carlo tree search differs from minimax because it…','Samples random playouts instead of enumerating every branch',['Always searches the whole tree','Uses a queue instead of a stack','Only works on mazes'],'Minimax enumerates; MCTS samples, which scales to huge trees like Go.'],
-  ['Which search remembers only the path it is currently on?','Depth-first search',['Breadth-first search','Uniform-cost search','A* search'],'That is why DFS is the low-memory option. BFS, UCS and A* all hold a wide frontier.'],
-  ['A constraint satisfaction problem is defined by…','Variables, domains and constraints',['States, actions and rewards','Nodes, edges and weights only','A start, a goal and a heuristic'],'Sudoku: 81 variables, each with the domain 1 to 9, constrained so no row, column or box repeats.'],
-  ['On an unweighted grid, how do A* (with Manhattan h) and BFS compare?','Both find the shortest path; A* usually explores fewer cells',['Only BFS finds the shortest path','Only A* finds the shortest path','A* explores more cells than BFS'],'Both are optimal there. The heuristic aims A* at the goal, so it wastes less effort.']
+/* ─────────────────────────────  quiz bank  ─────────────────────────────
+   D7 rows are copied from the war room's 01-TEST-PREP/bank/D7.json (the
+   search questions only; the hold-out bank stays out of practice).       */
+const D7_BANK=[
+  ['D7-003','Breadth-first search on an unweighted graph is guaranteed to find',['The shortest path counted in number of edges','The cheapest path when the edge costs differ','The longest available path to the goal node','A path found using the least possible memory'],0,'BFS explores level by level, so the first time it reaches the goal it has used the fewest edges. With varying edge costs you need uniform-cost search or Dijkstra.'],
+  ['D7-005','What is the purpose of alpha-beta pruning?',['To add a degree of randomness to move selection','To make the searched game tree considerably larger overall','To skip branches that cannot change the final choice','To convert minimax into a small neural network'],2,'Alpha-beta returns the same move as plain minimax while examining far fewer nodes, allowing deeper search in the same time.'],
+  ['D7-009','In the A* search formula f(n) = g(n) + h(n), what do g and h represent?',['g is the actual cost from start to n; h estimates the rest','g is the heuristic estimate; h is the cost paid so far','Both g and h are heuristic estimates of remaining cost','g is the goal depth; h is the branching factor of the tree'],0,'g is known cost already paid, h is the estimated cost remaining. Reversing them is the most common error on this question.'],
+  ['D7-010','For A* to guarantee an optimal solution, the heuristic must be admissible, meaning it',['Is always exactly zero for every node in the graph','Never overestimates the true cost remaining to the goal','Is computed by a small trained neural network','Always overestimates the cost that still remains to the goal'],1,'An admissible heuristic never overestimates, so A* cannot be misled into skipping the true optimal path. A heuristic of 0 is admissible but reduces A* to uniform-cost search.'],
+  ['D7-011','Compared with breadth-first search, depth-first search generally',['Uses less memory but it may miss the shortest path','Cannot be implemented using a stack data structure','Uses more memory and always finds the shortest path','Is identical to breadth-first search in every respect'],0,'DFS stores only the current path, so memory is proportional to depth rather than breadth, but it may find a long path before a short one.'],
+  ['D7-014','Monte Carlo tree search improves on plain minimax for games like Go by',['It converts the game into a regression problem','It removes the need for any evaluation function','Random simulations estimate the value of good branches','It exhaustively evaluates every single reachable position'],2,'MCTS samples playouts and concentrates effort on high-value branches, making enormous game trees tractable where exhaustive search is impossible.'],
+  ['D7-016','A constraint satisfaction problem is defined by',['A loss function together with a learning rate','A generator network and a discriminator network','A training set together with a held-out testing set','Variables, their domains, and constraints on them'],3,'Sudoku, scheduling, and map coloring are classic CSPs. Solvers use backtracking with constraint propagation and heuristics.'],
+  ['D7-018','In a 75-minute round you must solve 40 shortest-path maze problems optimally. What is the correct first implementation?',['A greedy walk that always steps toward the goal','A deep reinforcement learning agent trained live','Breadth-first search, simple, correct, optimal','A genetic algorithm evolving candidate routes'],2,'BFS is provably optimal on unweighted grids and takes minutes to write. Greedy walks get stuck, and learning-based approaches waste the entire round.'],
+  ['D7-021','A tic-tac-toe minimax agent explores the full game tree and never loses. Extending the same exhaustive approach to chess fails primarily because',['The tree is astronomically large, so depth limits','Minimax only works on a three-by-three board','Chess has no winning strategy at all for either side','Chess pieces are allowed to move at random'],0,'Tic-tac-toe is tiny: about 5,500 reachable board positions, or 255,168 complete games if you count whole sequences of play. Chess is estimated at more than 10^40 legal positions. Practical engines therefore search to a depth limit, score positions heuristically, and prune with alpha-beta.'],
+  ['D7-025','Which pairing of task and appropriate technique is correct?',['Playing chess by running k-means over board states','Detecting objects in images with breadth-first search','Exam scheduling with CSP, and route finding with A*','Shortest route on a weighted road map, with minimax'],2,'Exam scheduling is a classic CSP and route finding suits A* with a distance heuristic. The other pairings mismatch technique to problem type entirely.'],
+  ['D7-027','A constraint satisfaction problem is defined by',['a start state, a goal state, and a path cost between them','variables, domains, and constraints on allowed combinations','a set of labelled examples together with a loss function','states, actions, rewards, and a policy mapping one to another'],1,'Variables, their possible values, and the restrictions between them — map colouring and Sudoku being the standard examples. The second option describes a search problem and the fourth reinforcement learning.'],
+  ['D7-030','Depth-first search is a poor choice when',['the graph is small enough to explore completely','the search space is very deep or possibly infinite','memory is severely limited on the machine','you only need any valid path rather than the best one'],1,'Depth-first plunges down one branch before trying alternatives, so an unbounded or very deep branch can trap it. Its low memory use is exactly why it is chosen elsewhere.'],
+  ['D7-031','Two heuristics are both admissible. One returns values much closer to the true remaining cost. Compared with the weaker one, it will generally',['expand fewer nodes while still finding the optimal path','find a shorter path, because it estimates more accurately','stop guaranteeing an optimal result, being more aggressive','need more memory, because it stores more information per node'],0,'Admissibility means never overestimating, which is what protects optimality. A tighter estimate prunes more of the search, so the same optimal answer is found with less work.'],
+  ['D7-032','Alpha-beta pruning changes minimax by',['choosing a different move from the one minimax would choose','evaluating positions with a neural network instead of a rule','skipping branches that cannot affect the final decision','searching only the moves that look best at first glance'],2,'Alpha-beta returns exactly the move minimax would return. It simply avoids exploring branches already proven irrelevant, so the same answer costs far less.']
+];
+/* points the L14 lesson teaches that the D7 bank doesn't ask directly */
+const LESSON_BANK=[
+  ['L14','The guard\'s BFS keeps its frontier in a…',['Queue: first in, first out','Stack: last in, first out','Priority queue ordered by h','Single variable holding the current place'],0,'BFS takes the place that has waited longest, which is exactly what a queue gives you. DFS uses a stack.'],
+  ['L14','Swamp tiles cost 3 to cross and road tiles cost 1. Which search finds the guard\'s cheapest route to the tower?',['A* with an admissible heuristic','BFS, because it finds the fewest steps','DFS, because it uses the least memory','Greedy, because it heads straight for the tower'],0,'BFS counts steps, not cost, so it happily wades through swamp. A* ranks by g + h and, with an admissible h, returns the cheapest route.'],
+  ['L14','Why can straight-line distance never overestimate the cost left to the tower?',['No path to the tower is shorter than a straight line','It is always exactly equal to the true cost','It is recalculated after every step','It ignores the swamp tiles'],0,'Any real route is at least as long as the straight line, so the estimate is never too high. That makes it admissible.'],
+  ['L14','A heuristic of zero for every place on the map is…',['Admissible, but it gives A* no sense of direction','Inadmissible, because it is too low','Admissible, and it makes A* expand the fewest nodes','Not allowed in A* at all'],0,'Zero never overestimates, so A* stays optimal, but every place looks equally promising and A* spreads out like uniform-cost search.'],
+  ['L14','An A* uses 3 × the distance to the tower as its heuristic. What can happen?',['It may return a route that is not the cheapest','It always finds the cheapest route, faster','It explores every place, like BFS','It can no longer find any route'],0,'3 × the distance overestimates, so it is not admissible and A* can be talked out of the best route.']
 ];
 
 /* ─────────────────────────────  screens & modal  ───────────────────────────── */
@@ -1178,7 +1215,7 @@ function renderHome(){
   ARCADE.forEach(A=>{
     const ok=(P.stars[A.unlock]||0)>0,b=document.createElement('button');
     b.className='lv big'+(ok?'':' locked');
-    const best=A.id==='endless'?(P.best.endless?'Best: '+P.best.endless+' picks':''):(P.best.escape!=null?'Best: '+P.best.escape+'/3 escapes':'');
+    const best=A.id==='endless'?(P.best.endless?'Best: '+P.best.endless+' picks':''):(P.best.escape!=null?'Best: '+P.best.escape+'/3 races won':'');
     b.innerHTML='<span class="t">'+esc(A.title)+'</span><p class="d">'+esc(A.desc)+'</p>'+
       '<span class="best">'+(ok?esc(best||'No score yet'):'Unlocks after level '+(levelIdx(A.unlock)+1))+'</span>';
     b.addEventListener('click',()=>{if(!ok){toast('Clear level '+(levelIdx(A.unlock)+1)+' to unlock');return}
@@ -1231,7 +1268,7 @@ function startTrace(L){
   T={L,G,S:new Search(G,L.algo,{hScale:L.hScale||1}),hearts:3,score:0,combo:0,mistakes:0,hints:0,auto:false,over:false,picks:0,endless:false};
   setupTraceUI();
   board.setMap(G);board.setSearch(T.S,L.algo);board.show=L.show;
-  say('Start at <b>S</b>. It is the only cell in the frontier, so expand it.','');
+  say('Start at the gate, <b>S</b>. It is the only place in the frontier, so expand it.','');
   renderTrace();
   const me=T;cleanup=()=>{clearTimeout(me.autoT);me.over=true};
 }
@@ -1257,7 +1294,7 @@ function setupTraceUI(){
   $('#pAuto').hidden=T.endless;
   const mud=T.G.t.some(t=>t===MUD);
   $('#pLegend').innerHTML='<span><i style="background:var(--torch)"></i>frontier</span><span><i style="background:'+'hsl('+hueOf(a)+',55%,38%)'+'"></i>explored</span>'+
-    '<span><i style="background:var(--wall)"></i>wall</span>'+(mud?'<span><i style="background:var(--mud)"></i>mud, costs '+MUD_COST+'</span>':'')+
+    '<span><i style="background:var(--wall)"></i>wall</span>'+(mud?'<span><i style="background:var(--mud)"></i>swamp, costs '+MUD_COST+'</span>':'')+'<span>S gate · T tower</span>'+
     '<span><i style="background:var(--cream)"></i>path</span>';
 }
 function setAlgoChip(a,hs){const c=$('#pAlgo');c.textContent=hs?'A* · 3h':ALGOS[a].short;c.style.color=algoColor(a,66)}
@@ -1312,7 +1349,7 @@ function inspect(c){
 function explain(c){
   const S=T.S,G=T.G,a=T.L.algo,e=S.open.get(c),v=S.valid(),ev=S.open.get(v[0]),N=x=>'<b>'+cellName(G,x)+'</b>';
   const list=v.slice(0,3).map(N).join(', ')+(v.length>3?' …':'');
-  const goalNote=c===G.goal?' A search finishes when it expands the goal, not when it first sees it.':'';
+  const goalNote=c===G.goal?' A search finishes when it expands the tower, not when it first sees it.':'';
   return explainRule(c,e,v,ev,N,list,a,S)+goalNote;
 }
 function explainRule(c,e,v,ev,N,list,a,S){
@@ -1403,7 +1440,7 @@ function finishTrace(){
     bfs:new Search(G,'bfs').run(),ucs:new Search(G,'ucs').run(),greedy:new Search(G,'greedy').run()};
   const errs=T.mistakes+T.hints,stars=T.auto?1:errs===0?3:errs<=2?2:1;
   const bonus=T.auto?0:100+T.hearts*50;T.score+=bonus;renderTrace();
-  say('Goal reached. Tracing the path back through each cell\'s parent…','good');
+  say('Tower reached. Tracing the route back through each place\'s parent…','good');
   fanfare();
   awardLevel(L,stars);addXP(T.score);
   const me=T;
@@ -1427,11 +1464,11 @@ const ENDLESS_RULES={
   dfs:{rule:'Expand the <em>newest</em> cell: the highest number.',sub:'Numbers are push order.',show:'order'},
   greedy:{rule:'Expand the <em>lowest h</em>.',sub:'Ignore g completely.',show:'gh'},
   astar:{rule:'Expand the <em>lowest g + h</em>.',sub:'Add them up.',show:'gh'},
-  ucs:{rule:'Expand the <em>lowest g</em>.',sub:'Mud costs '+MUD_COST+'. Ignore h.',show:'gh'}
+  ucs:{rule:'Expand the <em>lowest g</em>.',sub:'Swamp costs '+MUD_COST+'. Ignore h.',show:'gh'}
 };
 function endlessIntro(){
   openModal('<p class="eyebrow">Arcade</p><h3>Endless Frontier</h3>'+
-    '<p>Every board shows <b>g+h</b> on each frontier cell (DFS boards show push order). The rule changes from board to board, so read the banner, then pick fast.</p>'+
+    '<p>Every board shows <b>g+h</b> on each frontier cell (DFS boards show push order). The rule changes from board to board, so read the banner, then pick fast. Swamp tiles cost '+MUD_COST+'.</p>'+
     '<div class="rulebox"><p class="eyebrow">Scoring</p><p>60 seconds. Correct pick: points × combo. Wrong pick: <em>−3 s</em>. Clear a board: <em>+4 s</em>.</p></div>'+
     (P.best.endless?'<p>Your best: <b>'+P.best.endless+'</b> correct picks.</p>':'')+
     '<div class="row"><button class="btn ghost" data-act="close">Back</button><button class="btn primary" data-act="go">Start</button></div>',
@@ -1493,7 +1530,8 @@ function endlessOver(){
 
 /* ─────────────────────────────  bets  ───────────────────────────── */
 let B=null;
-const contender=a=>a==='astar3'?{name:'A* with 3 × h',short:'A* 3h'}:{name:ALGOS[a].name,short:ALGOS[a].short};
+const CONTENDERS={astar3:'A* with 3 × h',astar0:'A* with h = 0',astarL:'A* · straight-line h'};
+const contender=(a,B)=>({name:(B&&B.labels&&B.labels[a])||CONTENDERS[a]||ALGOS[a].name});
 function startBet(L){
   showScreen('bet');
   B={L,round:0,right:0,seed:(Math.random()*1e6)|0};
@@ -1516,7 +1554,7 @@ function betRound(){
   const races=$('#bRaces');races.innerHTML='';
   B.boards=bet.B.algos.map(a=>{
     const el=document.createElement('div');el.className='racer';
-    const ct=contender(a);
+    const ct=contender(a,bet.B);
     el.innerHTML='<div class="rh"><span class="dot" style="background:'+algoColor(a)+'"></span>'+esc(ct.name)+'</div>'+
       '<div class="cvwrap"><canvas></canvas></div><div class="rs"><span>explored <b class="x">0</b></span><span>frontier <b class="f">1</b></span><span>peak <b class="pk">1</b></span><span>path cost <b class="pc">–</b></span></div>';
     races.appendChild(el);
@@ -1542,10 +1580,12 @@ function betAnswer(id){
     for(const x of B.boards){
       for(let i=0;i<n;i++)x.rep.step();
       const q=s=>x.el.querySelector(s);
-      q('.x').textContent=x.rep.order.length;q('.f').textContent=x.rep.open.size;q('.pk').textContent=x.rep.peak;
+      if(x.rep.done&&x.rep.src.lost)x.lostSteps=(x.lostSteps||0)+n;   // still walking the endless corridor
+      q('.x').textContent=x.rep.order.length+(x.lostSteps||0)+(x.rep.src.lost&&x.rep.done?' …':'');
+      q('.f').textContent=x.rep.open.size;q('.pk').textContent=x.rep.peak;
       if(x.rep.done&&!x.fin){
         x.fin=true;const p=x.rep.src.path();x.bd.path=p;x.bd.pathAnim={t0:now,dur:500};
-        q('.pc').textContent=p?x.rep.src.cost():'none';
+        q('.pc').textContent=x.rep.src.lost?'never':p?(+x.rep.src.cost().toFixed(1)):'none';
         tone(660+120*B.boards.indexOf(x),0.1);
       }
       if(!x.rep.done)all=false;
@@ -1704,7 +1744,8 @@ let Q=null;
 const Q_TIME=20;
 function startQuiz(L){
   showScreen('quiz');
-  const qs=shuffle(BANK.slice()).slice(0,10).map(([q,a,w,why])=>({q,a,why,opts:shuffle([a].concat(w))}));
+  const pick=(bank,n)=>shuffle(bank.slice()).slice(0,n).map(([src,q,choices,ans,why])=>({src,q,a:choices[ans],why,opts:shuffle(choices.slice())}));
+  const qs=shuffle(pick(D7_BANK,8).concat(pick(LESSON_BANK,2)));
   Q={L,qs,i:0,right:0,score:0,streak:0};
   $('#qLvl').textContent='Level '+(levelIdx(L.id)+1);
   quizShow();
@@ -1715,6 +1756,7 @@ function quizShow(){
   $('#qNum').textContent=(Q.i+1)+'/'+Q.qs.length;$('#qScore').textContent=Q.score.toLocaleString();
   $('#qStreak').textContent='×'+(1+Math.min(4,Q.streak)*0.25).toFixed(2).replace(/\.?0+$/,'');
   $('#qText').textContent=it.q;$('#qWhy').hidden=true;$('#qNext').hidden=true;
+  $('#qSrc').textContent=it.src==='L14'?'From the L14 lesson':'From your D7 bank · '+it.src;
   const box=$('#qOpts');box.innerHTML='';
   it.opts.forEach((o,k)=>{
     const b=document.createElement('button');b.className='qopt';b.innerHTML='<kbd>'+(k+1)+'</kbd><span>'+esc(o)+'</span>';
@@ -1759,10 +1801,10 @@ function quizDone(){
 let E=null,eBoard=null;
 const HEATS=['dfs','bfs','astar'],BOT_RATE=10,DIRS=[[0,-1],[1,0],[0,1],[-1,0]];
 function escapeIntro(){
-  openModal('<p class="eyebrow">Arcade</p><h3>Escape the Bots</h3>'+
-    '<p>Three heats. Each bot starts at <b>S</b> with you and searches for <b>G</b> at <b>'+BOT_RATE+' cells a second</b>. Reach G before the bot\'s search finds it.</p>'+
+  openModal('<p class="eyebrow">Arcade</p><h3>Race the Guards</h3>'+
+    '<p>Three heats. Each guard starts at the gate, <b>S</b>, with you and searches for the tower, <b>T</b>, at <b>'+BOT_RATE+' places a second</b>. Reach T before the guard\'s search finds it.</p>'+
     '<div class="rulebox"><p class="eyebrow">Controls</p><p>Arrow keys or WASD. On a phone, swipe on the maze or use the pad.</p></div>'+
-    '<p>The bots all run at the same speed. What changes is how much of the maze each one has to search.</p>'+
+    '<p>The guards all search at the same speed. What changes is how much of the castle each one has to explore.</p>'+
     '<div class="row"><button class="btn ghost" data-act="close">Back</button><button class="btn primary" data-act="go">Start heat 1</button></div>',
     {close:closeModal,go:()=>{closeModal();startEscape()}});
 }
@@ -1802,7 +1844,7 @@ function escHeat(){
   $('#eRule').innerHTML='<span style="color:'+algoColor(algo)+'">'+ALGOS[algo].name+'</span>: takes '+ALGOS[algo].take+'.';
   $('#eHeat').textContent=(E.heat+1)+'/'+HEATS.length;$('#eWins').textContent=E.wins;
   $('#eBot').textContent='0';$('#eYou').textContent='0';$('#eNext').hidden=true;
-  $('#eMsg').className='msg';$('#eMsg').innerHTML='Get ready. You are the cream dot at <b>S</b>; the exit is <b>G</b>.';
+  $('#eMsg').className='msg';$('#eMsg').innerHTML='Get ready. You are the cream dot at the gate, <b>S</b>. The tower is <b>T</b>.';
   let n=3;const cnt=$('#eCount');cnt.hidden=false;cnt.textContent=n;tone(440,0.12);
   clearInterval(E.cd);
   E.cd=setInterval(()=>{
@@ -1811,7 +1853,7 @@ function escHeat(){
     if(n>0){cnt.textContent=n;tone(440,0.12)}
     else{clearInterval(E.cd);cnt.textContent='GO';tone(880,0.2);setTimeout(()=>{cnt.hidden=true},400);
       E.state='run';E.t0=performance.now();E.last=E.t0;
-      $('#eMsg').innerHTML='Run! The '+ALGOS[algo].short+' bot is searching.';
+      $('#eMsg').innerHTML='Run! The '+ALGOS[algo].short+' guard is searching.';
       E.raf=requestAnimationFrame(escLoop)}
   },650);
 }
@@ -1844,9 +1886,9 @@ function escEnd(won){
   E.log.push({algo:E.algo,won,secs,need:full.order.length});
   $('#eWins').textContent=E.wins;
   const m=$('#eMsg');m.className='msg '+(won?'good':'bad');
-  m.innerHTML=(won?'<b>Escaped in '+secs+' s.</b> ':'<b>The bot found the exit first.</b> ')+
-    ALGOS[E.algo].short+' needed to explore <b>'+full.order.length+'</b> cells to find G'+(E.algo!=='bfs'?'; BFS needs '+bfsAll.order.length+' on this maze':'')+'.'+
-    (E.algo==='astar'?' Its heuristic aimed it at the exit.':E.algo==='dfs'?' DFS is luck: sometimes its first corridor is the right one.':' BFS checks every direction evenly.');
+  m.innerHTML=(won?'<b>Tower reached in '+secs+' s.</b> ':'<b>The guard found the tower first.</b> ')+
+    ALGOS[E.algo].short+' needed to explore <b>'+full.order.length+'</b> places to find T'+(E.algo!=='bfs'?'; BFS needs '+bfsAll.order.length+' on this map':'')+'.'+
+    (E.algo==='astar'?' Its heuristic aimed it at the tower.':E.algo==='dfs'?' DFS is luck: sometimes its first corridor is the right one.':' BFS checks every direction evenly.');
   const nb=$('#eNext');nb.hidden=false;nb.textContent=E.heat+1<HEATS.length?'Next heat: '+ALGOS[HEATS[E.heat+1]].short:'See results';nb.focus();
   eBoard.request();
 }
@@ -1854,9 +1896,9 @@ function escDone(){
   const prev=P.best.escape==null?-1:P.best.escape;
   if(E.wins>prev){P.best.escape=E.wins;saveP()}
   addXP(E.wins*150);
-  openModal('<p class="eyebrow">Arcade</p><h3>Escape the Bots</h3>'+(E.wins>prev&&prev>=0?'<p class="newbest">New best!</p>':'')+
+  openModal('<p class="eyebrow">Arcade</p><h3>Race the Guards</h3>'+(E.wins>prev&&prev>=0?'<p class="newbest">New best!</p>':'')+
     '<div class="stats">'+E.log.map(l=>statHtml(ALGOS[l.algo].short,l.won?l.secs+' s':'caught',l.need+' cells to search')).join('')+'</div>'+
-    '<p>Every bot explored '+BOT_RATE+' cells a second. A* is the hard one because its heuristic means it wastes almost nothing. BFS has to sweep the maze evenly, which is the price of its shortest-path guarantee.</p>'+
+    '<p>Every guard explored '+BOT_RATE+' places a second. A* is the hard one because its heuristic means it wastes almost nothing. BFS has to sweep the castle evenly, which is the price of its shortest-path guarantee.</p>'+
     '<div class="row"><button class="btn ghost" data-act="map">Map</button><button class="btn primary" data-act="retry">Run it again</button></div>',
     {map:goHome,retry:()=>{closeModal();startEscape()},close:goHome});
 }

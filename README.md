@@ -25,17 +25,21 @@ Keyboard: <kbd>Space</kbd> play/pause, <kbd>R</kbd> new maze.
 the next cell from the frontier. Instead of watching, you play the rule yourself, one click
 per expansion, and the algorithm happens. Also a single self-contained file.
 
+It follows lesson L14 of the TSA AI war room ("the AI inside one video game"): a castle
+guard walks from the gate (S) to the tower (T), swamp costs 3 and road costs 1, and the
+final exam draws on the D7 question bank.
+
 | Mode | What you do |
 |---|---|
-| Trace levels | Be BFS (oldest cell), DFS (newest), Greedy (lowest h), A* (lowest f = g + h), UCS (lowest g). Three hearts; a wrong pick explains which cell the rule wanted and why |
-| Bets | Predict the race (shorter path, bigger frontier, fewer cells explored), then watch it play out |
-| Cut the Tree | Minimax with alpha-beta: flip cards left to right and prune only what is proven irrelevant |
-| Final Exam | 10 timed questions drawn from a bank of 20 |
+| Trace levels | Be BFS (oldest cell), DFS (newest), Greedy (lowest h), A* (lowest f = g + h), UCS / A* with h = 0 (lowest g). Three hearts; a wrong pick explains which cell the rule wanted and why |
+| Bets | Predict a race, then watch it: shorter path, bigger frontier, DFS lost in an endless corridor, h = 0 vs a real heuristic, straight-line vs grid distance |
+| Cut the Tree | The tavern board game: minimax with alpha-beta, flipping cards and pruning only what is proven irrelevant |
+| Final Exam | 10 timed questions: 8 from the D7 bank, 2 on points the lesson adds |
 | Endless Frontier | 60-second time attack where the rule changes every board |
-| Escape the Bots | Run the maze yourself against DFS, BFS and A*, all exploring at 10 cells a second |
+| Race the Guards | Run the castle yourself against DFS, BFS and A* guards, all exploring 10 places a second |
 
 Every trace map was chosen by search so its lesson holds however the player breaks ties:
-Greedy always ends 4 steps longer than A*, DFS always returns a 16-step path where 8 exists,
+Greedy always ends 4 steps longer than A*, DFS always returns a 16-step route where 8 exists,
 and A* with 3 × h always misses the cheapest route. Bet rounds generate a fresh maze each
 time and keep only mazes where the race proves the answer. Progress, stars and best scores
 are saved in `localStorage`.
